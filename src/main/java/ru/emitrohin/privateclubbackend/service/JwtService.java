@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+//TODO А правильно ли размещен? Это точно сервис?
 @Service
 public class JwtService {
 

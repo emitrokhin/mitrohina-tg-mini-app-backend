@@ -6,7 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.emitrohin.privateclubbackend.dto.MaterialRequest;
-import ru.emitrohin.privateclubbackend.dto.MaterialResponse;
+import ru.emitrohin.privateclubbackend.dto.response.AdminMaterialResponse;
+import ru.emitrohin.privateclubbackend.dto.response.MaterialResponse;
 import ru.emitrohin.privateclubbackend.service.MaterialService;
 
 import java.util.List;
@@ -21,8 +22,8 @@ public class AdminMaterialController {
     private final MaterialService materialService;
 
     @GetMapping("materials/{id}")
-    public ResponseEntity<MaterialResponse> getMaterial(@PathVariable("id") UUID id) {
-        Optional<MaterialResponse> data = materialService.findById(id);
+    public ResponseEntity<AdminMaterialResponse> getMaterial(@PathVariable("id") UUID id) {
+        Optional<AdminMaterialResponse> data = materialService.adminFindById(id);
         return data
                 .map(value -> new ResponseEntity<>(value, HttpStatus.CREATED))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));

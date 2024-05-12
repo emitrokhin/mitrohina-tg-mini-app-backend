@@ -4,11 +4,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.emitrohin.privateclubbackend.dto.MaterialRequest;
-import ru.emitrohin.privateclubbackend.dto.MaterialResponse;
+import ru.emitrohin.privateclubbackend.dto.response.AdminMaterialResponse;
+import ru.emitrohin.privateclubbackend.dto.response.MaterialResponse;
 import ru.emitrohin.privateclubbackend.mapper.MaterialMapper;
 import ru.emitrohin.privateclubbackend.model.Material;
 import ru.emitrohin.privateclubbackend.repository.MaterialRepository;
-import ru.emitrohin.privateclubbackend.repository.TopicRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,8 +21,14 @@ public class MaterialService {
 
     private final MaterialRepository materialRepository;
 
-    public Optional<MaterialResponse> findById(UUID dataId) {
-        return materialRepository.findById(dataId).map(MaterialMapper.INSTANCE::toResponse);
+    public Optional<AdminMaterialResponse> adminFindById(UUID dataId) {
+        return materialRepository.findById(dataId).map(MaterialMapper.INSTANCE::toAdminResponse);
+    }
+
+    //TODO возникает путаница. где мапить то? мне кажется сервисы должгы это делать, но тогда в контроллере непонятно
+    //чего ожидать
+    public Optional<Material> findById(UUID dataId) {
+        return materialRepository.findById(dataId);
     }
 
     public List<MaterialResponse> findAllByTopicId(UUID topicId) {

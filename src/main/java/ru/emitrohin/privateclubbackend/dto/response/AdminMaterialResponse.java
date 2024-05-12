@@ -1,11 +1,11 @@
-package ru.emitrohin.privateclubbackend.dto;
+package ru.emitrohin.privateclubbackend.dto.response;
 
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.URL;
 
 import java.util.UUID;
 
-public record MaterialResponse(
+public record AdminMaterialResponse(
 
         UUID id,
 
@@ -14,5 +14,5 @@ public record MaterialResponse(
         @NotBlank
         String title,
 
-        @URL(message = "Media URL must be a valid URL")
-        String mediaUrl) { }
+        @NotBlank
+        String objectKey) { }

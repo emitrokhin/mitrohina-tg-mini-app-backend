@@ -26,6 +26,7 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable)//TODO включать в проде и настроить
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/my/test/**").permitAll()
                         .requestMatchers("/api/admin/**").hasAuthority(Role.ADMIN.name())
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

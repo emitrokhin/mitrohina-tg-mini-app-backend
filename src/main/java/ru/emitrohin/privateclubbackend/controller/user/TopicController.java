@@ -22,7 +22,7 @@ public class TopicController {
     public ResponseEntity<TopicResponse> getTopic(@PathVariable("id") UUID id) {
         Optional<TopicResponse> topic = topicService.findById(id);
         return topic
-                .map(value -> new ResponseEntity<>(value, HttpStatus.CREATED))
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 

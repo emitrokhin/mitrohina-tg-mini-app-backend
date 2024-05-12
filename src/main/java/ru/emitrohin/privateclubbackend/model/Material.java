@@ -15,8 +15,8 @@ public class Material extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
-    private String mediaUrl;
+    @Column(name = "object_key", nullable = false)
+    private String objectKey; //TODO rename to objectKey for s3
 
     @ManyToOne
     @JoinColumn(name = "topic_id", nullable = false)
@@ -38,7 +38,7 @@ public class Material extends BaseEntity {
         return "Material{" +
                 "id=" + getId() +
                 ", title='" + title + '\'' +
-                ", mediaUrl='" + mediaUrl + '\'' +
+                ", objectKey='" + objectKey + '\'' +
                 '}';
     }
 }

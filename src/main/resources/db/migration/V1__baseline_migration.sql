@@ -33,13 +33,13 @@ CREATE TABLE material_enrollments
 
 CREATE TABLE materials
 (
-    id         UUID                        NOT NULL,
-    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    title      VARCHAR(255)                NOT NULL,
-    media_url  VARCHAR(255)                NOT NULL,
-    topic_id   UUID                        NOT NULL,
-    CONSTRAINT pk_materials PRIMARY KEY (id)
+    id          UUID                        NOT NULL,
+    created_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    title       VARCHAR(255)                NOT NULL,
+    object_key  VARCHAR(255)                NOT NULL,
+    topic_id    UUID                        NOT NULL,
+    CONSTRAINT  pk_materials PRIMARY KEY (id)
 );
 
 CREATE TABLE topic_enrollments
