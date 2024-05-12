@@ -93,7 +93,7 @@ public class PreloadDatabase {
         for (int i = 0; i < 1 + Math.abs(random.nextInt(20)); i++) {
             Material material = new Material();
             material.setTitle(ruFaker.educator().course());
-            material.setMediaUrl(enFaker.internet().url());
+            material.setObjectKey("test/1.mp3");
             material.setTopic(topic);
 
             log.info("Preloading data {}", repository.save(material));

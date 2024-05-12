@@ -26,7 +26,7 @@ public class MaterialController {
     public ResponseEntity<MaterialResponse> getMaterial(@PathVariable("id") UUID id) {
         return materialService.findById(id)
                 .map(material -> {
-                    URL mediaUrl = s3Service.generatePresignedUrl(material.getMediaUrl());
+                    URL mediaUrl = s3Service.generatePresignedUrl(material.getObjectKey());
                     return ResponseEntity.ok(MaterialMapper.INSTANCE.toResponse(material, mediaUrl.toExternalForm()));
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
