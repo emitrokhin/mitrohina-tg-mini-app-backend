@@ -10,7 +10,7 @@ import java.util.List;
 @Table(name = "courses")
 @Getter
 @Setter
-public class Course extends BaseEntity {
+public class Course extends PublishableEntity {
 
     @Column(nullable = false)
     private String title;
@@ -18,8 +18,11 @@ public class Course extends BaseEntity {
     @Column(nullable = false)
     private String description;
 
-    @Column(name = "cover_url", nullable = false)
-    private String coverUrl;
+    @Column(name = "cover_object_key", nullable = false)
+    private String coverObjectKey;
+
+    @Column(name = "published", nullable = false)
+    private boolean published = false;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Topic> topics;
@@ -41,7 +44,7 @@ public class Course extends BaseEntity {
                 "id=" + getId() +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", coverUrl='" + coverUrl + '\'' +
+                ", coverObjectKey='" + coverObjectKey + '\'' +
                 '}';
     }
 }

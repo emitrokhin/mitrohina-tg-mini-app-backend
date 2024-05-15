@@ -10,7 +10,7 @@ import java.util.List;
 @Table(name = "materials")
 @Getter
 @Setter
-public class Material extends BaseEntity {
+public class Material extends PublishableEntity {
 
     @Column(nullable = false)
     private String title;

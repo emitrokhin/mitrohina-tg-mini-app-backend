@@ -10,7 +10,7 @@ import java.util.List;
 @Table(name = "topics")
 @Getter
 @Setter
-public class Topic extends BaseEntity {
+public class Topic extends PublishableEntity {
 
     @Column(nullable = false)
     private String title;
@@ -18,8 +18,8 @@ public class Topic extends BaseEntity {
     @Column(nullable = false)
     private String description;
 
-    @Column(name = "cover_url", nullable = false)
-    private String coverUrl;
+    @Column(name = "cover_object_key", nullable = false)
+    private String coverObjectKey;
 
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
@@ -50,7 +50,7 @@ public class Topic extends BaseEntity {
                 "id=" + getId() +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", coverLink='" + coverUrl + '\'' +
+                ", coverObjectKey='" + coverObjectKey + '\'' +
                 ", course=" + course.getTitle() +
                 '}';
     }

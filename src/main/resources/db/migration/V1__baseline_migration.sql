@@ -16,7 +16,8 @@ CREATE TABLE courses
     updated_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     title       VARCHAR(255)                NOT NULL,
     description VARCHAR(255)                NOT NULL,
-    cover_url   VARCHAR(255)                NOT NULL,
+    cover_object_key  VARCHAR(255)          NOT NULL,
+    published         BOOLEAN               NOT NULL DEFAULT false,
     CONSTRAINT pk_courses PRIMARY KEY (id)
 );
 
@@ -37,8 +38,9 @@ CREATE TABLE materials
     created_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     title       VARCHAR(255)                NOT NULL,
-    object_key  VARCHAR(255)                NOT NULL,
+    cover_object_key  VARCHAR(255)                NOT NULL,
     topic_id    UUID                        NOT NULL,
+    published         BOOLEAN               NOT NULL DEFAULT false,
     CONSTRAINT  pk_materials PRIMARY KEY (id)
 );
 
@@ -60,8 +62,9 @@ CREATE TABLE topics
     updated_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     title       VARCHAR(255)                NOT NULL,
     description VARCHAR(255)                NOT NULL,
-    cover_url   VARCHAR(255)                NOT NULL,
+    cover_object_key   VARCHAR(255)                NOT NULL,
     course_id   UUID                        NOT NULL,
+    published         BOOLEAN               NOT NULL DEFAULT false,
     CONSTRAINT pk_topics PRIMARY KEY (id)
 );
 
