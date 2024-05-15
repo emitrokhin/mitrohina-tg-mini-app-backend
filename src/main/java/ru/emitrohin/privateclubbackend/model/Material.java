@@ -15,8 +15,8 @@ public class Material extends PublishableEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(name = "object_key", nullable = false)
-    private String objectKey; //TODO rename to objectKey for s3
+    @Column(name = "cover_object_key", nullable = false)
+    private String coverObjectKey;
 
     @ManyToOne
     @JoinColumn(name = "topic_id", nullable = false)
@@ -38,7 +38,7 @@ public class Material extends PublishableEntity {
         return "Material{" +
                 "id=" + getId() +
                 ", title='" + title + '\'' +
-                ", objectKey='" + objectKey + '\'' +
+                ", coverObjectKey='" + coverObjectKey + '\'' +
                 '}';
     }
 }

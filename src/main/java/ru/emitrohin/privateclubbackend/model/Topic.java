@@ -40,11 +40,6 @@ public class Topic extends PublishableEntity {
     }
 
     @Override
-    public int hashCode() {
-        return getId() != null ? getId().hashCode() : 0;
-    }
-
-    @Override
     public String toString() {
         return "Topic{" +
                 "id=" + getId() +

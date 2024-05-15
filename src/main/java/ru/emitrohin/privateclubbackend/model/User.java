@@ -47,11 +47,6 @@ public class User extends BaseEntity {
         return getId() != null && getId().equals(user.getId());
     }
 
-    @Override
-    public int hashCode() {
-        return getId() != null ? getId().hashCode() : 0;
-    }
-
     //TODO что маскируем
     @Override
     public String toString() {
