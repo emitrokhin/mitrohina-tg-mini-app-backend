@@ -1,9 +1,9 @@
-package ru.emitrohin.privateclubbackend.mapper;
+package ru.emitrohin.privateclubbackend.dto.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
-import ru.emitrohin.privateclubbackend.dto.request.TelegramUserRequest;
-import ru.emitrohin.privateclubbackend.dto.UserResponse;
+import ru.emitrohin.privateclubbackend.dto.request.telegram.TelegramUserRequest;
+import ru.emitrohin.privateclubbackend.dto.response.UserResponse;
 import ru.emitrohin.privateclubbackend.model.User;
 
 @Mapper

@@ -1,16 +1,19 @@
-package ru.emitrohin.privateclubbackend.dto;
+package ru.emitrohin.privateclubbackend.dto.response.topic;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.URL;
 import ru.emitrohin.privateclubbackend.model.Material;
 
 import java.util.List;
 import java.util.UUID;
 
-public record TopicResponse(
+public record TopicDetailsResponse(
 
+        @NotNull
         UUID id,
 
+        @NotNull
         UUID courseId,
 
         @NotBlank
@@ -22,10 +25,10 @@ public record TopicResponse(
         @URL(message = "Cover URL must be a valid URL")
         String coverUrl,
 
-        List<MaterialResponse> materials) {
+        List<MaterialSummaryResponse> materials) {
         /**
          * DTO for {@link Material}
          */
-        public record MaterialResponse(UUID id, String title, String mediaUrl) {
+        public record MaterialSummaryResponse(UUID id, String title) {
         }
 }

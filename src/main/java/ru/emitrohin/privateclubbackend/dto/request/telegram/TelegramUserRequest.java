@@ -1,4 +1,4 @@
-package ru.emitrohin.privateclubbackend.dto.request;
+package ru.emitrohin.privateclubbackend.dto.request.telegram;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

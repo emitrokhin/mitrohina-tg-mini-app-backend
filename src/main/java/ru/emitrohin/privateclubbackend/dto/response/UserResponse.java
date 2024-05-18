@@ -1,4 +1,4 @@
-package ru.emitrohin.privateclubbackend.dto;
+package ru.emitrohin.privateclubbackend.dto.response;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public record UserResponse(
 
+        @NotNull
         UUID id,
 
         @NotNull(message = "Telegram ID cannot be null")

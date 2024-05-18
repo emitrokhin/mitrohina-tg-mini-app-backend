@@ -1,15 +1,18 @@
-package ru.emitrohin.privateclubbackend.dto;
+package ru.emitrohin.privateclubbackend.dto.response.topic;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.URL;
-import ru.emitrohin.privateclubbackend.model.Topic;
 
-import java.util.List;
 import java.util.UUID;
 
-public record CourseRequest(
+public record TopicSummaryResponse(
 
+        @NotNull
         UUID id,
+
+        @NotNull
+        UUID courseId,
 
         @NotBlank
         String title,
@@ -18,4 +21,5 @@ public record CourseRequest(
         String description,
 
         @URL(message = "Cover URL must be a valid URL")
-        String coverUrl) { }
+        String coverUrl) {
+}
