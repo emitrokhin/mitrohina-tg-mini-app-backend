@@ -61,7 +61,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContext context = SecurityContextHolder.createEmptyContext();
 
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            telegramId,
+                            authUser.get().getId(),
                             null,
                             List.of(new SimpleGrantedAuthority(authUser.get().getRole().name()))
                     );
