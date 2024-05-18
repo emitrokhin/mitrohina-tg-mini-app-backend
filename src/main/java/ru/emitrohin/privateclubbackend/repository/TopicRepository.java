@@ -11,8 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface TopicRepository extends JpaRepository<Topic, UUID> {
-    @EntityGraph(attributePaths = {"materials"})
-    Optional<Topic> findById(UUID id);
 
-    List<Topic> findByCourseId(UUID courseId);
+    @EntityGraph(attributePaths = {"materials"})
+    Optional<Topic> findByIdAndPublishedTrue(UUID id);
 }
