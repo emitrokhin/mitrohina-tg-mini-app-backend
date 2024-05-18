@@ -3,17 +3,23 @@ package ru.emitrohin.privateclubbackend.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.emitrohin.privateclubbackend.dto.MaterialRequest;
-import ru.emitrohin.privateclubbackend.dto.response.AdminMaterialResponse;
-import ru.emitrohin.privateclubbackend.dto.response.MaterialResponse;
-import ru.emitrohin.privateclubbackend.mapper.MaterialMapper;
-import ru.emitrohin.privateclubbackend.model.Material;
+import ru.emitrohin.privateclubbackend.dto.mapper.EnrollmentMapper;
+import ru.emitrohin.privateclubbackend.dto.mapper.MaterialMapper;
+import ru.emitrohin.privateclubbackend.dto.request.material.MaterialCreateRequest;
+import ru.emitrohin.privateclubbackend.dto.request.material.MaterialUpdateRequest;
+import ru.emitrohin.privateclubbackend.dto.response.material.AdminMaterialResponse;
+import ru.emitrohin.privateclubbackend.dto.response.EnrollmentResponse;
+import ru.emitrohin.privateclubbackend.dto.response.material.MaterialResponse;
+import ru.emitrohin.privateclubbackend.model.EnrollmentStatus;
+import ru.emitrohin.privateclubbackend.model.MaterialEnrollment;
+import ru.emitrohin.privateclubbackend.repository.MaterialEnrollmentRepository;
 import ru.emitrohin.privateclubbackend.repository.MaterialRepository;
+import ru.emitrohin.privateclubbackend.repository.TopicRepository;
+import ru.emitrohin.privateclubbackend.repository.UserRepository;
+import ru.emitrohin.privateclubbackend.util.UserUtils;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,34 +27,70 @@ public class MaterialService {
 
     private final MaterialRepository materialRepository;
 
-    public Optional<AdminMaterialResponse> adminFindById(UUID dataId) {
-        return materialRepository.findById(dataId).map(MaterialMapper.INSTANCE::toAdminResponse);
+    private final TopicRepository topicRepository;
+
+    private final UserRepository userRepository;
+
+    private final MaterialEnrollmentRepository materialEnrollmentRepository;
+
+    private final MaterialMapper materialMapper;
+
+    private final EnrollmentMapper enrollmentMapper;
+
+    public Optional<AdminMaterialResponse> findById(UUID materialId) {
+        return materialRepository.findById(materialId).map(materialMapper::toAdminMaterialResponse);
     }
 
-    //TODO возникает путаница. где мапить то? мне кажется сервисы должгы это делать, но тогда в контроллере непонятно
-    //чего ожидать
-    public Optional<Material> findById(UUID dataId) {
-        return materialRepository.findById(dataId);
-    }
-
-    public List<MaterialResponse> findAllByTopicId(UUID topicId) {
-        return materialRepository.findByTopicId(topicId)
-                .stream()
-                .map(MaterialMapper.INSTANCE::toResponse)
-                .collect(Collectors.toList());
-    }
-
-    public MaterialResponse save(MaterialRequest materialRequest) {
-        Material newData = MaterialMapper.INSTANCE.toMaterial(materialRequest);
-        Material savedData = materialRepository.save(newData);
-        return MaterialMapper.INSTANCE.toResponse(savedData);
+    public Optional<MaterialResponse> findByIdAndPublishedTrue(UUID materialId) {
+        return materialRepository.findByIdAndPublishedTrue(materialId).map(materialMapper::toMaterialResponse);
     }
 
     @Transactional
-    public Optional<MaterialResponse> update(UUID id, MaterialRequest materialRequest) {
-        return materialRepository.findById(id)
-                .map(data -> materialRepository.save(MaterialMapper.INSTANCE.toMaterial(materialRequest)))
-                .map(MaterialMapper.INSTANCE::toResponse);
+    public AdminMaterialResponse createMaterial(MaterialCreateRequest createRequest, String coverObjectKey, String mediaObjectKey) {
+        var topicId = createRequest.topicId();
+        var topic = topicRepository.findById(topicId)
+                .orElseThrow(() -> new RuntimeException("Topic not found with id: " + topicId)); //TODO свой тип исключения?
+        var newMaterial = materialMapper.fromMaterialCreateRequest(createRequest, topic, coverObjectKey, mediaObjectKey);
+        var savedMaterial = materialRepository.save(newMaterial);
+        return materialMapper.toAdminMaterialResponse(savedMaterial);
+    }
+
+    @Transactional
+    public Optional<AdminMaterialResponse> updateMaterial(UUID materialId, MaterialUpdateRequest updateRequest, String coverObjectKey, String mediaObjectKey) {
+        var topic = topicRepository.findById(materialId)
+                .orElseThrow(() -> new RuntimeException("Topic not found with id: " + materialId));
+        return materialRepository.findById(materialId)
+                .map(material -> materialRepository.save(materialMapper.fromMaterialUpdateRequest(updateRequest, topic, coverObjectKey, mediaObjectKey)))
+                .map(materialMapper::toAdminMaterialResponse);
+    }
+
+    public Optional<AdminMaterialResponse> updatePublishedStatus(UUID materialId, boolean published) {
+        return materialRepository.findById(materialId)
+                .map(topic -> {
+                    topic.setPublished(published);
+                    return materialRepository.save(topic);
+                }).map(materialMapper::toAdminMaterialResponse);
+    }
+
+    @Transactional
+    public EnrollmentResponse setTopicEnrollmentStatus(UUID materialId, EnrollmentStatus status) {
+        var material = materialRepository.findById(materialId)
+                .orElseThrow(() -> new RuntimeException("Material not found with id: " + materialId)); //TODO свой тип исключения?
+
+        var userId = UserUtils.getCurrentUserId();
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId)); //TODO свой тип исключения?
+
+        var materialEnrollment = materialEnrollmentRepository.findByMaterial_IdAndUser_Id(materialId, userId)
+                .orElseGet(() -> {
+                    var enrollment = new MaterialEnrollment();
+                    enrollment.setMaterial(material);
+                    enrollment.setUser(user);
+                    enrollment.setStatus(status);
+                    return materialEnrollmentRepository.save(enrollment);
+                });
+
+        return enrollmentMapper.fromMaterialEnrollment(materialEnrollment);
     }
 
     @Transactional

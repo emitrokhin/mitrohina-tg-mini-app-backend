@@ -4,8 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.emitrohin.privateclubbackend.dto.request.TelegramUserRequest;
-import ru.emitrohin.privateclubbackend.dto.UserResponse;
+import ru.emitrohin.privateclubbackend.dto.request.telegram.TelegramUserRequest;
+import ru.emitrohin.privateclubbackend.dto.response.UserResponse;
 import ru.emitrohin.privateclubbackend.service.UserService;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/admin/users")
+@RequestMapping("/admin/users")
 public class AdminUserController {
 
     private final UserService userService;

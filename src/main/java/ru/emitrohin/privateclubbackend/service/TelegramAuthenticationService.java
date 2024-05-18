@@ -5,14 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.emitrohin.privateclubbackend.dto.request.TelegramInitDataRequest;
-import ru.emitrohin.privateclubbackend.dto.request.TelegramUserRequest;
+import ru.emitrohin.privateclubbackend.dto.request.telegram.TelegramInitDataRequest;
+import ru.emitrohin.privateclubbackend.dto.request.telegram.TelegramUserRequest;
 import ru.emitrohin.privateclubbackend.dto.response.JwtAuthenticationResponse;
 import ru.emitrohin.privateclubbackend.model.User;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;

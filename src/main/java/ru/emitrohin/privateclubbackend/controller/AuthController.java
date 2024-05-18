@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.emitrohin.privateclubbackend.dto.request.TelegramInitDataRequest;
+import ru.emitrohin.privateclubbackend.dto.request.telegram.TelegramInitDataRequest;
 import ru.emitrohin.privateclubbackend.dto.response.JwtAuthenticationResponse;
 import ru.emitrohin.privateclubbackend.service.TelegramAuthenticationService;
 

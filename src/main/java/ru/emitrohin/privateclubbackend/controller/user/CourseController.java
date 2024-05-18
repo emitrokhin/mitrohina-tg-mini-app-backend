@@ -3,65 +3,57 @@ package ru.emitrohin.privateclubbackend.controller.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.emitrohin.privateclubbackend.dto.CourseResponse;
+import ru.emitrohin.privateclubbackend.dto.response.EnrollmentResponse;
+import ru.emitrohin.privateclubbackend.dto.response.course.CourseDetailsResponse;
+import ru.emitrohin.privateclubbackend.dto.response.course.CourseSummaryResponse;
+import ru.emitrohin.privateclubbackend.model.EnrollmentStatus;
 import ru.emitrohin.privateclubbackend.service.CourseService;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-//TODO перенести API в свойвства
-@RequestMapping("api/my/courses")
+@RequestMapping("/my/courses")
+//TODO не берется в учет published статус во всех методах
 public class CourseController {
 
     private final CourseService courseService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<CourseResponse> getCourse(@PathVariable("id") UUID id) {
-        Optional<CourseResponse> course = courseService.findById(id);
-        return course
+    //TODO не взят статус enrolled в темах
+    public ResponseEntity<CourseDetailsResponse> getCourseDetails(@PathVariable("id") UUID topicId) {
+        return courseService.findByIdAndPublishedTrue(topicId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    //TODO для пользователя нужна будет своя логика вывода
-    public ResponseEntity<List<CourseResponse>> getAllCourses() {
-        List<CourseResponse> courses = courseService.findAllCourses();
+    public ResponseEntity<List<CourseSummaryResponse>> getAllPublishedCourses() {
+        var courses = courseService.findAllPublishedCourses();
         return ResponseEntity.ok(courses);
     }
 
-/*    @GetMapping("/enrolled")
-    public ResponseEntity<List<CourseResponse>> getEnrolledCourses() {
-        List<CourseResponse> courses = courseService.getEnrolledCourses();
+   @GetMapping("/enrolled")
+    public ResponseEntity<List<CourseSummaryResponse>> getMyEnrolledCourses() {
+        var courses = courseService.getMyEnrolledCourses();
         return ResponseEntity.ok(courses);
     }
 
     @GetMapping("/completed")
-    public ResponseEntity<List<CourseResponse>> getCompletedCourses() {
-        List<CourseResponse> courses = courseService.getCompletedCourses();
+    public ResponseEntity<List<CourseSummaryResponse>> getMyCompletedCourses() {
+        var courses = courseService.getMyCompletedCourses();
         return ResponseEntity.ok(courses);
     }
 
-    //TODO для выполнения действий нужен Post?
     @PostMapping("/{id}/enroll")
-    public ResponseEntity<CourseResponse> enrollInCourse(@PathVariable("id") UUID id) {
-        //TODO внутри должна быть логика, что возвращать контроллеру? В случае успеха? В случае неуспеха?
-        Optional<CourseResponse> course = courseService.enrollInCourse(id);
-        return course
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<EnrollmentResponse> enrollInCourse(@PathVariable("id") UUID courseId) {
+        var response = courseService.setCourseEnrollmentStatus(courseId, EnrollmentStatus.ACTIVE);
+        return ResponseEntity.ok(response);
     }
 
-    //TODO для выполнения действий нужен Post?
-    @PostMapping("/{id}/finish")
-    public ResponseEntity<CourseResponse> enrollInCourse(@PathVariable("id") UUID id) {
-        //TODO внутри должна быть логика, что возвращать контроллеру? В случае успеха? В случае неуспеха?
-        Optional<CourseResponse> course = courseService.enrollInCourse(id);
-        return course
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }*/
+    //TODO реализация завершения курса на основе события
+
+    //TODO реализация старта курса на основе события
+
 }
