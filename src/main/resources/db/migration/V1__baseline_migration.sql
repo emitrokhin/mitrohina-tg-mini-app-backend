@@ -34,14 +34,16 @@ CREATE TABLE material_enrollments
 
 CREATE TABLE materials
 (
-    id          UUID                        NOT NULL,
-    created_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    title       VARCHAR(255)                NOT NULL,
-    cover_object_key  VARCHAR(255)                NOT NULL,
-    topic_id    UUID                        NOT NULL,
-    published         BOOLEAN               NOT NULL DEFAULT false,
-    CONSTRAINT  pk_materials PRIMARY KEY (id)
+    id               UUID                        NOT NULL,
+    published        BOOLEAN                     NOT NULL default false,
+    created_at       TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at       TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    title            VARCHAR(255)                NOT NULL,
+    duration         INTEGER                     NOT NULL,
+    media_object_key VARCHAR(255)                NOT NULL,
+    cover_object_key VARCHAR(255)                NOT NULL,
+    topic_id         UUID                        NOT NULL,
+    CONSTRAINT pk_materials PRIMARY KEY (id)
 );
 
 CREATE TABLE topic_enrollments
@@ -57,14 +59,14 @@ CREATE TABLE topic_enrollments
 
 CREATE TABLE topics
 (
-    id          UUID                        NOT NULL,
-    created_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    updated_at  TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    title       VARCHAR(255)                NOT NULL,
-    description VARCHAR(255)                NOT NULL,
-    cover_object_key   VARCHAR(255)                NOT NULL,
-    course_id   UUID                        NOT NULL,
-    published         BOOLEAN               NOT NULL DEFAULT false,
+    id               UUID                        NOT NULL,
+    published        BOOLEAN                     NOT NULL DEFAULT false,
+    created_at       TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at       TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    title            VARCHAR(255)                NOT NULL,
+    description      VARCHAR(255)                NOT NULL,
+    cover_object_key VARCHAR(255)                NOT NULL,
+    course_id        UUID                        NOT NULL,
     CONSTRAINT pk_topics PRIMARY KEY (id)
 );
 

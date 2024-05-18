@@ -18,7 +18,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 
 @Configuration
-@Profile("dev")
+@Profile("preload")
 public class PreloadDatabase {
     private static final Logger log = LoggerFactory.getLogger(PreloadDatabase.class);
     private static final Faker ruFaker = new Faker(new Locale("ru"));
@@ -63,7 +63,7 @@ public class PreloadDatabase {
             Course course = new Course();
             course.setTitle(ruFaker.educator().course());
             course.setDescription(ruFaker.shakespeare().romeoAndJulietQuote());
-            course.setCoverUrl(enFaker.internet().url());
+            course.setCoverObjectKey(UUID.randomUUID().toString());
 
             Course saved = courseRepository.save(course);
             log.info("Preloading course {}", course);
@@ -79,7 +79,7 @@ public class PreloadDatabase {
             Topic topic = new Topic();
             topic.setTitle(ruFaker.educator().course());
             topic.setDescription(ruFaker.shakespeare().romeoAndJulietQuote());
-            topic.setCoverUrl(enFaker.internet().url());
+            topic.setCoverObjectKey(UUID.randomUUID().toString());
             topic.setCourse(course);
 
             Topic saved = topicRepository.save(topic);
@@ -93,7 +93,9 @@ public class PreloadDatabase {
         for (int i = 0; i < 1 + Math.abs(random.nextInt(20)); i++) {
             Material material = new Material();
             material.setTitle(ruFaker.educator().course());
-            material.setObjectKey("test/1.mp3");
+            material.setCoverObjectKey(UUID.randomUUID().toString());
+            material.setMediaObjectKey(UUID.randomUUID().toString());
+            material.setDuration(new Random().nextInt(10) + 1);
             material.setTopic(topic);
 
             log.info("Preloading data {}", repository.save(material));

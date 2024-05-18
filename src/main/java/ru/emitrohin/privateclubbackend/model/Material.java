@@ -15,6 +15,12 @@ public class Material extends PublishableEntity {
     @Column(nullable = false)
     private String title;
 
+    @Column(nullable = false)
+    private Integer duration;
+
+    @Column(name = "media_object_key", nullable = false)
+    private String mediaObjectKey;
+
     @Column(name = "cover_object_key", nullable = false)
     private String coverObjectKey;
 
@@ -38,6 +44,8 @@ public class Material extends PublishableEntity {
         return "Material{" +
                 "id=" + getId() +
                 ", title='" + title + '\'' +
+                ", duration=" + duration +
+                ", mediaObjectKey='" + mediaObjectKey + '\'' +
                 ", coverObjectKey='" + coverObjectKey + '\'' +
                 '}';
     }
