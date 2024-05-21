@@ -1,6 +1,7 @@
 package ru.emitrohin.privateclubbackend.dto.response.topic;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.URL;
 import ru.emitrohin.privateclubbackend.model.Material;
 
@@ -9,8 +10,10 @@ import java.util.UUID;
 
 public record AdminTopicDetailsResponse(
 
+        @NotNull
         UUID id,
 
+        @NotNull
         UUID courseId,
 
         @NotBlank
@@ -28,6 +31,6 @@ public record AdminTopicDetailsResponse(
         /**
          * DTO for {@link Material}
          */
-        public record MaterialSummaryResponse(UUID id, String title) {
+        public record MaterialSummaryResponse(@NotNull UUID id, @NotNull String title) {
         }
 }

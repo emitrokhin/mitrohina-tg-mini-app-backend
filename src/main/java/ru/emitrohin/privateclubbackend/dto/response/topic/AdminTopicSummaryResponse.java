@@ -1,6 +1,7 @@
 package ru.emitrohin.privateclubbackend.dto.response.topic;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.URL;
 import ru.emitrohin.privateclubbackend.model.Material;
 
@@ -9,8 +10,10 @@ import java.util.UUID;
 
 public record AdminTopicSummaryResponse(
 
+        @NotNull
         UUID id,
 
+        @NotNull
         UUID courseId,
 
         @NotBlank

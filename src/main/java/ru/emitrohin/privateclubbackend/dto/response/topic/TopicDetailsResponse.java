@@ -29,6 +29,6 @@ public record TopicDetailsResponse(
         /**
          * DTO for {@link Material}
          */
-        public record MaterialSummaryResponse(UUID id, String title) {
+        public record MaterialSummaryResponse(@NotNull UUID id, @NotBlank String title, @NotNull Integer duration) {
         }
 }
