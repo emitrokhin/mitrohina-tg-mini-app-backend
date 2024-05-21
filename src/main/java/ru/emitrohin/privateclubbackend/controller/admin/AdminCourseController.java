@@ -82,6 +82,8 @@ public class AdminCourseController {
                 }
             }
             return ResponseEntity.internalServerError().build();
+        } finally {
+            findCourseObjectKeyAndDelete(id);
         }
     }
 
@@ -92,10 +94,16 @@ public class AdminCourseController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    //TODO delete is s3
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCourse(@PathVariable("id") UUID id) {
         courseService.deleteById(id);
+        findCourseObjectKeyAndDelete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private void findCourseObjectKeyAndDelete(UUID courseId) {
+        courseService.getCourseObjectKey(courseId).ifPresentOrElse(
+                s3Utils::deleteFile,
+                () -> logger.warn("Can't delete objectKey file for course {}", courseId));
     }
 }

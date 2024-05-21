@@ -12,6 +12,7 @@ import ru.emitrohin.privateclubbackend.dto.response.topic.AdminTopicSummaryRespo
 import ru.emitrohin.privateclubbackend.dto.response.topic.TopicDetailsResponse;
 import ru.emitrohin.privateclubbackend.dto.mapper.TopicMapper;
 import ru.emitrohin.privateclubbackend.model.EnrollmentStatus;
+import ru.emitrohin.privateclubbackend.model.Topic;
 import ru.emitrohin.privateclubbackend.model.TopicEnrollment;
 import ru.emitrohin.privateclubbackend.repository.CourseRepository;
 import ru.emitrohin.privateclubbackend.repository.TopicEnrollmentRepository;
@@ -105,5 +106,9 @@ public class TopicService {
                     topic.setPublished(published);
                     return topicRepository.save(topic);
                 }).map(topicMapper::toAdminTopicSummaryResponse);
+    }
+
+    public Optional<String> getTopicObjectKey(UUID topicId) {
+        return topicRepository.findById(topicId).map(Topic::getCoverObjectKey);
     }
 }

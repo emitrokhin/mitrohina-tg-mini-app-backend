@@ -10,6 +10,7 @@ import ru.emitrohin.privateclubbackend.dto.request.material.MaterialUpdateReques
 import ru.emitrohin.privateclubbackend.dto.response.material.AdminMaterialResponse;
 import ru.emitrohin.privateclubbackend.dto.response.EnrollmentResponse;
 import ru.emitrohin.privateclubbackend.dto.response.material.MaterialResponse;
+import ru.emitrohin.privateclubbackend.model.Material;
 import ru.emitrohin.privateclubbackend.model.EnrollmentStatus;
 import ru.emitrohin.privateclubbackend.model.MaterialEnrollment;
 import ru.emitrohin.privateclubbackend.repository.MaterialEnrollmentRepository;
@@ -102,5 +103,9 @@ public class MaterialService {
 
             materialRepository.deleteById(id);
         });
+    }
+
+    public Optional<String> getMaterialObjectKey(UUID materialId) {
+        return materialRepository.findById(materialId).map(Material::getCoverObjectKey);
     }
 }

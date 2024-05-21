@@ -87,10 +87,14 @@ public class AdminTopicController {
     }
 
     @DeleteMapping("/{id}")
-    //TODO delete is s3
-
     public ResponseEntity<HttpStatus> deleteTopic(@PathVariable("id") UUID topicId) {
         topicService.deleteById(topicId);
         return ResponseEntity.noContent().build(); //No content is RESTful
+    }
+
+    private void findTopicObjectKeyAndDelete(UUID topicId) {
+        topicService.getTopicObjectKey(topicId).ifPresentOrElse(
+                s3Utils::deleteFile,
+                () -> logger.warn("Can't delete objectKey file for topic {}", topicId));
     }
 }

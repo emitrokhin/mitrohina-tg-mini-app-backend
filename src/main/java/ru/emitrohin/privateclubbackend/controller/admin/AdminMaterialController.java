@@ -70,6 +70,8 @@ public class AdminMaterialController {
             deleteFile(mediaObjectKey);
 
             return ResponseEntity.internalServerError().build();
+        } finally {
+            findMaterialObjectKeyAndDelete(materialId);
         }
     }
 
@@ -82,10 +84,9 @@ public class AdminMaterialController {
     }
 
     @DeleteMapping("/{id}")
-    //TODO delete is s3
-
     public ResponseEntity<Void> deleteMaterial(@PathVariable("id") UUID id) {
         materialService.deleteById(id);
+        findMaterialObjectKeyAndDelete(id);
         return ResponseEntity.noContent().build(); //No content is RESTful
     }
 
@@ -97,5 +98,11 @@ public class AdminMaterialController {
                 logger.warn("Can't delete file with objectKey {}. Reason: {}", objectKey, ex.getMessage());
             }
         }
+    }
+
+    private void findMaterialObjectKeyAndDelete(UUID materialId) {
+        materialService.getMaterialObjectKey(materialId).ifPresentOrElse(
+                s3Utils::deleteFile,
+                () -> logger.warn("Can't delete objectKey file for material {}", materialId));
     }
 }

@@ -9,6 +9,7 @@ import ru.emitrohin.privateclubbackend.dto.request.course.UpdateCourseRequest;
 import ru.emitrohin.privateclubbackend.dto.response.EnrollmentResponse;
 import ru.emitrohin.privateclubbackend.dto.response.course.*;
 import ru.emitrohin.privateclubbackend.dto.mapper.CourseMapper;
+import ru.emitrohin.privateclubbackend.model.Course;
 import ru.emitrohin.privateclubbackend.model.CourseEnrollment;
 import ru.emitrohin.privateclubbackend.model.EnrollmentStatus;
 import ru.emitrohin.privateclubbackend.repository.CourseEnrollmentRepository;
@@ -125,5 +126,9 @@ public class CourseService {
                     return courseRepository.save(course);
                 })
                 .map(courseMapper::toAdminCourseSummaryResponse);
+    }
+
+    public Optional<String> getCourseObjectKey(UUID courseId) {
+        return courseRepository.findById(courseId).map(Course::getCoverObjectKey);
     }
 }
