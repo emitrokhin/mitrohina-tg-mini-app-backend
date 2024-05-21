@@ -43,15 +43,15 @@ server:
 
 
 jwt:
-  key: 1DA6EE2E51A27C7D8740FA9AC2F1E808DBA4EFFA7E6C134FE6AB667528CC87AD
+  key: ${JWT_SECRET}
   expiration: 6400
 telegram:
-  botToken: 2200142737:AAFJaXPlfdQZ_sdN8qS73vqEnVTMgzT2V3A
+  botToken: ${BOT_TOKEN}
   authExpirationTime: 3600
 
 s3:
-  url: https://media.mitrohinayulya.ru #https://s3.timeweb.cloud
-  bucketName: d9448f39-de1300a0-194f-4f03-8e6f-fef059f790f3
-  accessKey: FT1F73OJ9WR4DG80UZPR
-  secretKey: 2oFDIvcOrGguyXCNKcckDnAhaayCMe2JT58MKc2d
-  region: ru-1
+  url: ${S3_URL}
+  bucketName: ${S3_BUCKET_NAME}
+  accessKey: ${S3_ACCESS_KEY}
+  secretKey: ${S3_SECRET_KEY}
+  region: ${S3_REGION}
