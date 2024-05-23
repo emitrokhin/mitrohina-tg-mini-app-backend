@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
+//TODO при обновлении coverImage mediaFile может отсутствовать
 public record MaterialUpdateRequest(
 
         @NotNull
