@@ -11,6 +11,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 //TODO А правильно ли размещен? Это точно сервис?
@@ -27,6 +28,11 @@ public class JwtService {
     public long extractTelegramId(String token) {
         String claim = extractClaim(token, Claims::getSubject);
         return Long.parseLong(claim);
+    }
+
+    public UUID extractAdminId(String token) {
+        String claim = extractClaim(token, Claims::getSubject);
+        return UUID.fromString(claim);
     }
 
     public Date extractExpiration(String token) {
@@ -55,12 +61,29 @@ public class JwtService {
         return ( (extractTelegramId == telegramId) && !isTokenExpired(token));
     }
 
-    public String generateToken(Long telegramId){
+    public Boolean isAdminTokenValid(String token, UUID adminId) {
+        try {
+            UUID extractedAdminId = extractAdminId(token);
+            return ((extractedAdminId.equals(adminId)) && !isTokenExpired(token));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public String generateTokenForTelegramId(Long telegramId){
+        return generateTokenForString(String.valueOf(telegramId));
+    }
+
+    public String generateTokenForUUID(UUID id){
+        return generateTokenForString(id.toString());
+    }
+
+    private String generateTokenForString(String token){
         Map<String, Object> claims = new HashMap<>();
         return Jwts.builder().claims(claims)
-                .subject(String.valueOf(telegramId))
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60))
+                .subject(token)
+                .issuedAt(new Date())
+                .expiration(new Date(new Date().getTime() + validityInMilliseconds))
                 .signWith(getSignKey(), Jwts.SIG.HS256).compact();
     }
 

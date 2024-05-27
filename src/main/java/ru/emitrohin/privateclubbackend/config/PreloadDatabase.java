@@ -1,23 +1,23 @@
 package ru.emitrohin.privateclubbackend.config;
 
 import com.github.javafaker.Faker;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.emitrohin.privateclubbackend.model.*;
-import ru.emitrohin.privateclubbackend.repository.MaterialRepository;
-import ru.emitrohin.privateclubbackend.repository.CourseRepository;
-import ru.emitrohin.privateclubbackend.repository.TopicRepository;
-import ru.emitrohin.privateclubbackend.repository.UserRepository;
+import ru.emitrohin.privateclubbackend.repository.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
 @Configuration
+@RequiredArgsConstructor
 @Profile("preload")
 public class PreloadDatabase {
     private static final Logger log = LoggerFactory.getLogger(PreloadDatabase.class);
@@ -25,16 +25,33 @@ public class PreloadDatabase {
     private static final Faker enFaker = new Faker();
     private static final Random random = new Random();
 
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final AdminUserRepository adminUserRepository;
+    private final CourseRepository courseRepository;
+    private final TopicRepository topicRepository;
+    private final MaterialRepository materialRepository;
+
     @Bean
-    CommandLineRunner initDatabase(UserRepository userRepository,
-                                   CourseRepository courseRepository,
-                                   TopicRepository topicRepository,
-                                   MaterialRepository materialRepository) {
+    CommandLineRunner initDatabase() {
 
         return args -> {
+            initAdminUsers(adminUserRepository);
             initUsers(userRepository);
             initCourse(courseRepository, topicRepository, materialRepository);
         };
+    }
+
+    private void initAdminUsers(AdminUserRepository adminUserRepository) {
+        LocalDateTime createdAt = LocalDateTime.now().minusDays(random.nextInt(365));  // Случайная дата посещения в прошлом году
+        LocalDateTime lastVisit = LocalDateTime.now(ZoneOffset.UTC).minusDays(random.nextInt(365));  // Случайная дата посещения в прошлом году
+        AdminUser adminUser = new AdminUser();
+        adminUser.setUsername("admin");
+        adminUser.setPassword(passwordEncoder.encode("password"));
+        adminUser.setRole(Role.ADMIN);
+        adminUser.setCreatedAt(createdAt);
+        adminUser.setLastVisit(lastVisit);
+        log.info("Preloading admin {}", adminUserRepository.save(adminUser));
     }
 
      private void initUsers(UserRepository repository) {

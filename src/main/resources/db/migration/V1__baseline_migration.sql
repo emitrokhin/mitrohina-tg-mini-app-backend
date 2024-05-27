@@ -70,6 +70,21 @@ CREATE TABLE topics
     CONSTRAINT pk_topics PRIMARY KEY (id)
 );
 
+CREATE TABLE admin_users
+(
+    id         UUID                        NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    username   VARCHAR(255)                NOT NULL,
+    password   VARCHAR(255)                NOT NULL,
+    role       VARCHAR(255)                NOT NULL,
+    last_visit TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    CONSTRAINT pk_admin_users PRIMARY KEY (id)
+);
+
+ALTER TABLE admin_users
+    ADD CONSTRAINT uc_admin_users_username UNIQUE (username);
+
 CREATE TABLE users
 (
     id          UUID                        NOT NULL,

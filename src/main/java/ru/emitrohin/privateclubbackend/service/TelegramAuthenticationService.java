@@ -74,7 +74,7 @@ public class TelegramAuthenticationService {
             userService.save(telegramUserRequest);
         }
 
-        String jwt = jwtService.generateToken(telegramId);
+        String jwt = jwtService.generateTokenForTelegramId(telegramId);
         return new JwtAuthenticationResponse(jwt);
     }
 

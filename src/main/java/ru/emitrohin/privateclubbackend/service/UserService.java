@@ -4,11 +4,17 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import ru.emitrohin.privateclubbackend.dto.mapper.AdminUserMapper;
+import ru.emitrohin.privateclubbackend.dto.request.LoginPasswordRequest;
+import ru.emitrohin.privateclubbackend.dto.request.PasswordUpdateRequest;
 import ru.emitrohin.privateclubbackend.dto.request.telegram.TelegramUserRequest;
+import ru.emitrohin.privateclubbackend.dto.response.AdminUserResponse;
 import ru.emitrohin.privateclubbackend.dto.response.UserResponse;
 import ru.emitrohin.privateclubbackend.dto.mapper.UserMapper;
+import ru.emitrohin.privateclubbackend.model.AdminUser;
 import ru.emitrohin.privateclubbackend.model.Role;
 import ru.emitrohin.privateclubbackend.model.User;
+import ru.emitrohin.privateclubbackend.repository.AdminUserRepository;
 import ru.emitrohin.privateclubbackend.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -22,6 +28,8 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository repository;
+
+    private final AdminUserRepository adminRepository;
 
     public Optional<UserResponse> findById(UUID id) {
         return repository.findById(id).map(UserMapper.INSTANCE::toResponse);
@@ -84,5 +92,45 @@ public class UserService {
         //TODO как обрабатывать ошибки на этом этапе. parseLong может парсить Null. А это значит что нет авторизации
         long telegramId = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getName());
         return findByTelegramId(telegramId).map(UserMapper.INSTANCE::toResponse);
+    }
+
+    public Optional<AdminUser> findAdminByUsername(String username) {
+        return adminRepository.findByUsername(username);
+    }
+
+    public Optional<AdminUserResponse> findAdminById(UUID adminUserId) {
+        return adminRepository.findById(adminUserId).map(AdminUserMapper.INSTANCE::toResponse);
+    }
+
+    //TODO разобраться с названиями и действиями, потому как в норме тут все мапится
+    public Optional<AdminUser> findAdminByIdForFilter(UUID adminUserId) {
+        return adminRepository.findById(adminUserId);
+    }
+
+    public List<AdminUserResponse> findAllAdminUsers() {
+        return adminRepository.findAll()
+                .stream()
+                .map(AdminUserMapper.INSTANCE::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public void deleteAdminUserById(UUID id) {
+        adminRepository.deleteById(id);
+    }
+
+    public AdminUserResponse registerAdminUser(LoginPasswordRequest request) {
+        if (adminRepository.findByUsername(request.username()).isPresent()) {
+            throw new IllegalArgumentException("Username is already taken");
+        }
+        var adminUser = AdminUserMapper.INSTANCE.fromPasswordLoginRequest(request);
+        var savedUser =  adminRepository.save(adminUser);
+        return AdminUserMapper.INSTANCE.toResponse(savedUser);
+    }
+
+    public AdminUserResponse updateAdminUser(UUID id, PasswordUpdateRequest request) {
+        var adminUser = adminRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));//TODO свой тип исключения
+        AdminUserMapper.INSTANCE.update(adminUser, request);
+        var updatedUser =  adminRepository.save(adminUser);
+        return AdminUserMapper.INSTANCE.toResponse(updatedUser);
     }
 }

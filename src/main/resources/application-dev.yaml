@@ -44,7 +44,7 @@ server:
 
 jwt:
   key: ${JWT_SECRET}
-  expiration: 6400
+  expiration: 3600000
 telegram:
   botToken: ${BOT_TOKEN}
   authExpirationTime: 3600
