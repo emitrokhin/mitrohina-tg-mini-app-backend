@@ -1,94 +1,87 @@
 package ru.emitrohin.privateclubbackend.service;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
-//TODO А правильно ли размещен? Это точно сервис?
 @Service
+@RequiredArgsConstructor
+//TODO класс прямая калька с предыдущей версии JJWT.
 public class JwtService {
 
     @Value("${jwt.key}")
     private String jwtSigningKey;
 
     @Value("${jwt.expiration}")
-    //TODO задействовать, никак не использется пока
     private long validityInMilliseconds;
 
+    private final Clock clock;
+
     public long extractTelegramId(String token) {
-        String claim = extractClaim(token, Claims::getSubject);
-        return Long.parseLong(claim);
+        return Long.parseLong(extractClaim(token, DecodedJWT::getSubject));
     }
 
     public UUID extractAdminId(String token) {
-        String claim = extractClaim(token, Claims::getSubject);
-        return UUID.fromString(claim);
+        return UUID.fromString(extractClaim(token, DecodedJWT::getSubject));
+    }
+
+    private Algorithm getAlgorithm() {
+        return Algorithm.HMAC256(jwtSigningKey);
+    }
+
+    private DecodedJWT decodeToken(String token) {
+        JWTVerifier.BaseVerification verification = (JWTVerifier.BaseVerification) JWT.require(getAlgorithm());
+        return verification.build(clock).verify(token);
+    }
+
+    private <T> T extractClaim(String token, Function<DecodedJWT, T> claimsResolver) {
+        final DecodedJWT jwt = decodeToken(token);
+        return claimsResolver.apply(jwt);
     }
 
     public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+        return extractClaim(token, DecodedJWT::getExpiresAt);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+    public boolean tokenIsNotExpired(String token) {
+        return !extractExpiration(token).before(Date.from(clock.instant()));
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getSignKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+    public boolean isTokenValid(String token, long telegramId) {
+        return (extractTelegramId(token) == telegramId) && tokenIsNotExpired(token);
     }
 
-    private Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    public Boolean isTokenValid(String token, long telegramId) {
-        long extractTelegramId = extractTelegramId(token);
-        return ( (extractTelegramId == telegramId) && !isTokenExpired(token));
-    }
-
-    public Boolean isAdminTokenValid(String token, UUID adminId) {
+    public boolean isAdminTokenValid(String token, UUID adminId) {
         try {
-            UUID extractedAdminId = extractAdminId(token);
-            return ((extractedAdminId.equals(adminId)) && !isTokenExpired(token));
+            return (extractAdminId(token).equals(adminId)) && tokenIsNotExpired(token);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public String generateTokenForTelegramId(Long telegramId){
-        return generateTokenForString(String.valueOf(telegramId));
+    public String generateTokenForTelegramId(Long telegramId) {
+        return generateToken(String.valueOf(telegramId));
     }
 
-    public String generateTokenForUUID(UUID id){
-        return generateTokenForString(id.toString());
+    public String generateTokenForUUID(UUID id) {
+        return generateToken(id.toString());
     }
 
-    private String generateTokenForString(String token){
-        Map<String, Object> claims = new HashMap<>();
-        return Jwts.builder().claims(claims)
-                .subject(token)
-                .issuedAt(new Date())
-                .expiration(new Date(new Date().getTime() + validityInMilliseconds))
-                .signWith(getSignKey(), Jwts.SIG.HS256).compact();
-    }
-
-    private SecretKey getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSigningKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+    private String generateToken(String subject) {
+        Instant now = clock.instant();
+        return JWT.create()
+                .withSubject(subject)
+                .withIssuedAt(Date.from(now))
+                .withExpiresAt(Date.from(now.plusMillis(validityInMilliseconds)))
+                .sign(Algorithm.HMAC256(jwtSigningKey));
     }
 }

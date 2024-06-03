@@ -6,7 +6,7 @@ import ru.emitrohin.privateclubbackend.dto.request.telegram.TelegramUserRequest;
 import ru.emitrohin.privateclubbackend.dto.response.UserResponse;
 import ru.emitrohin.privateclubbackend.model.User;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface UserMapper {
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 

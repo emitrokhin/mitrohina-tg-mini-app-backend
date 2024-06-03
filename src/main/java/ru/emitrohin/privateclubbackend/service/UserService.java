@@ -89,9 +89,8 @@ public class UserService {
     }
 
     public Optional<UserResponse> getCurrentUser() {
-        //TODO как обрабатывать ошибки на этом этапе. parseLong может парсить Null. А это значит что нет авторизации
-        long telegramId = Long.parseLong(SecurityContextHolder.getContext().getAuthentication().getName());
-        return findByTelegramId(telegramId).map(UserMapper.INSTANCE::toResponse);
+        var id = UUID.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+        return findById(id);
     }
 
     public Optional<AdminUser> findAdminByUsername(String username) {
@@ -123,7 +122,7 @@ public class UserService {
             throw new IllegalArgumentException("Username is already taken");
         }
         var adminUser = AdminUserMapper.INSTANCE.fromPasswordLoginRequest(request);
-        var savedUser =  adminRepository.save(adminUser);
+        var savedUser = adminRepository.save(adminUser);
         return AdminUserMapper.INSTANCE.toResponse(savedUser);
     }
 

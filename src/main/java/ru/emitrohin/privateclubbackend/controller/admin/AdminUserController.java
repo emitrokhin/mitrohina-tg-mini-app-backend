@@ -50,6 +50,8 @@ public class AdminUserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }*/
 
+    //TODO а нужен ли такой endpoint? вручную по умолчанию ничего не редактируется, тем более не через TelegramUserRequest
+    /*
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> updateUser(@PathVariable("id") UUID id,
                                                    @Valid @RequestBody TelegramUserRequest telegramUserRequest) {
@@ -58,6 +60,9 @@ public class AdminUserController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+    */
+
+    //TODO ban user
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserById(@PathVariable("id") UUID id) {
@@ -96,11 +101,14 @@ public class AdminUserController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/admins/{id}")
-    public ResponseEntity<AdminUserResponse> updateAdminUser(@PathVariable("id") UUID id,
-                                                             @Valid @RequestBody PasswordUpdateRequest updateRequest) {
+    @PutMapping("/admins/{id}/update-password")
+    //TODO при смене пароля надо инвалидировать jwt токен
+    public ResponseEntity<AdminUserResponse> updateAdminUserPassword(@PathVariable("id") UUID id,
+                                                                     @Valid @RequestBody PasswordUpdateRequest updateRequest) {
         return ResponseEntity.ok(userService.updateAdminUser(id, updateRequest));
     }
+
+    //TODO метод полного обновления админа
 
     @PostMapping("/admins")
     public ResponseEntity<AdminUserResponse> registerAdminUser(@RequestBody @Valid LoginPasswordRequest request) {

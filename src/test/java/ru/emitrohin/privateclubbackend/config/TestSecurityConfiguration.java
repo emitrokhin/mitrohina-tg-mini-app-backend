@@ -1,9 +1,11 @@
 package ru.emitrohin.privateclubbackend.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -18,17 +21,11 @@ import ru.emitrohin.privateclubbackend.filter.AdminJwtAuthenticationFilter;
 import ru.emitrohin.privateclubbackend.filter.JwtAuthenticationFilter;
 import ru.emitrohin.privateclubbackend.model.Role;
 
-@Configuration
+@TestConfiguration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@Profile("!test") //TODO должно быть как то подругому
-//TODO обобщить фильтры adminJwtAuthenticationFilter и jwtAuthenticationFilter
-//TODO CSRF, CORS
-//TODO Обобщить конфигурацию http
-//TODO создать конфиг для https
-//TODO пересмотреть Отключаение автоматическую регистрации JwtAuthenticationFilter/Admin
-//TODO отключить стандартные /error и generated password is for development use only.
-public class SecurityConfiguration {
+//TODO не пойму, почему оригинальный SecurityConfiguration не взлетает автоматом rest template
+public class TestSecurityConfiguration {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -83,6 +80,6 @@ public class SecurityConfiguration {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return NoOpPasswordEncoder.getInstance(); //TODO deprecated
     }
 }

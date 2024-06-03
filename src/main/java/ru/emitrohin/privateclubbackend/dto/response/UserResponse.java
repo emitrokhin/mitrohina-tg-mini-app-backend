@@ -15,8 +15,13 @@ public record UserResponse(
         @Positive(message = "Telegram ID must be positive")
         Long telegramId,
 
+        @NotNull(message = "First name cannot be null")
         String firstName,
+
+        //TODO становится null. прийти к одному виду
         String lastName,
+
+        //TODO становится пустым. прийти к одному виду
         String username,
 
         @URL(message = "Photo URL must be a valid URL")
