@@ -12,6 +12,6 @@ import java.util.UUID;
 
 public interface TopicRepository extends JpaRepository<Topic, UUID> {
 
-    @EntityGraph(attributePaths = {"materials"})
+    @Query("SELECT t FROM Topic t LEFT JOIN FETCH t.materials m WHERE t.id = :id AND t.published = true AND m.published = true")
     Optional<Topic> findByIdAndPublishedTrue(UUID id);
 }

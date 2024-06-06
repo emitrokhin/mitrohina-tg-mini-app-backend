@@ -12,8 +12,10 @@ public abstract class AbstractDatabaseTest {
 
     protected static final Logger log = LoggerFactory.getLogger("integration-test");
 
-    @SuppressWarnings("resource")
-    protected static PostgreSQLContainer<?> container = new PostgreSQLContainer<>(POSTGRES_DOCKER_VERSION).withDatabaseName("mini-app");
+    //Запускать вручную без аннотаций, иначе withReuse работать не будет
+    protected static PostgreSQLContainer<?> container = new PostgreSQLContainer<>(POSTGRES_DOCKER_VERSION)
+            .withDatabaseName("mini-app")
+            .withReuse(true);
 
     static {
         container.start();

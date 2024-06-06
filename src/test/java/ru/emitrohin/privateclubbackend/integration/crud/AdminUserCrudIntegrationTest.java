@@ -5,27 +5,30 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.RequestEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import ru.emitrohin.privateclubbackend.dto.response.AdminUserResponse;
 import ru.emitrohin.privateclubbackend.dto.response.JwtAuthenticationResponse;
 import ru.emitrohin.privateclubbackend.integration.AbstractIntegrationTest;
+import ru.emitrohin.privateclubbackend.integration.AbstractS3Test;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-@ActiveProfiles("test")
 public class AdminUserCrudIntegrationTest extends AbstractIntegrationTest {
 
-    final private String validJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1MjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDQiLCJpYXQiOjE3MTcwMDEwMTAsImV4cCI6MTcxNzAwNDYxMH0.oAQ25G2twbUKVPaSlcxkqQUchJBNVTLqSoOWIqkqwGo";
-    private String jwtToken;
-    private UUID newAdminId;
+    final private String VALID_JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1MjNlNDU2Ny1lODliLTEyZDMtYTQ1Ni00MjY2MTQxNzQwMDQiLCJpYXQiOjE3MTcwMDEwMTAsImV4cCI6MTcxNzAwNDYxMH0.oAQ25G2twbUKVPaSlcxkqQUchJBNVTLqSoOWIqkqwGo";
 
     @TestFactory
     Collection<DynamicTest> authAndAdminUserCRUDTest() {
+        final AtomicReference<String> jwtToken = new AtomicReference<>();
+        final AtomicReference<UUID> newAdminId = new AtomicReference<>();
+
         return List.of(
                 dynamicTest("Стартовый админ авторизуется", () -> {
                     final var loginPasswordRequest = """
@@ -43,14 +46,14 @@ public class AdminUserCrudIntegrationTest extends AbstractIntegrationTest {
 
                     assertThat(createAdminResponse.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200)); //ok
                     assertThat(createAdminResponse.getBody()).isNotNull();
-                    assertThat(createAdminResponse.getBody()).hasFieldOrPropertyWithValue("token", validJwtToken);
+                    assertThat(createAdminResponse.getBody()).hasFieldOrPropertyWithValue("token", VALID_JWT_TOKEN);
 
-                    jwtToken = createAdminResponse.getBody().token();
+                    jwtToken.set(createAdminResponse.getBody().token());
                     log.info("Authorizing admin with jwt token {}", jwtToken);
 
                 }),
                 dynamicTest("Создать админа", () -> {
-                    assertThat(jwtToken).as("Токен не был создан. Админ не аутентифицирован").isNotNull();
+                    assertThat(jwtToken.get()).as("Токен не был создан. Админ не аутентифицирован").isNotNull();
                     final var createRequest = """
                         {
                             "username": "newAdmin",
@@ -70,11 +73,10 @@ public class AdminUserCrudIntegrationTest extends AbstractIntegrationTest {
                     assertThat(createResponse.getBody()).hasFieldOrProperty("id");
                     assertThat(createResponse.getBody()).hasFieldOrPropertyWithValue("username", "newAdmin");
 
-                    newAdminId = createResponse.getBody().id();
-                    log.info("Creating admin with id {}", newAdminId);
+                    newAdminId.set(createResponse.getBody().id());
                 }),
                 dynamicTest("Получить данные админа по id", () -> {
-                    assertThat(jwtToken).as("Токен не был создан. Админ не аутентифицирован").isNotNull();
+                    assertThat(jwtToken.get()).as("Токен не был создан. Админ не аутентифицирован").isNotNull();
                     assertThat(newAdminId).as("Id не существует. Новый админ не был создан").isNotNull();
 
                     final var readByIdResponse = restTemplate.exchange(RequestEntity
@@ -90,7 +92,7 @@ public class AdminUserCrudIntegrationTest extends AbstractIntegrationTest {
                     assertThat(readByIdResponse.getBody()).hasFieldOrPropertyWithValue("username", "newAdmin");
                 }),
                 dynamicTest("Получить списков двух админов", () -> {
-                    assertThat(jwtToken).as("Токен не был создан. Админ не аутентифицирован").isNotNull();
+                    assertThat(jwtToken.get()).as("Токен не был создан. Админ не аутентифицирован").isNotNull();
 
                     var readAllAdminsResponse = restTemplate.exchange(RequestEntity
                                     .get("/admin/users/admins")
@@ -104,7 +106,7 @@ public class AdminUserCrudIntegrationTest extends AbstractIntegrationTest {
                     assertThat(readAllAdminsResponse.getBody()).extracting("username").containsExactlyInAnyOrder("newAdmin", "admin");
                 }),
                 dynamicTest("Обновить пароль админа", () -> {
-                    assertThat(jwtToken).as("Токен не был создан. Админ не аутентифицирован").isNotNull();
+                    assertThat(jwtToken.get()).as("Токен не был создан. Админ не аутентифицирован").isNotNull();
                     assertThat(newAdminId).as("Id не существует. Новый админ не был создан").isNotNull();
 
                     final var passwordUpdateRequest = """
@@ -125,7 +127,7 @@ public class AdminUserCrudIntegrationTest extends AbstractIntegrationTest {
                     assertThat(updateResponse.getBody()).hasFieldOrPropertyWithValue("username", "newAdmin");
                 }),
                 dynamicTest("Удалить админа", () -> {
-                    assertThat(jwtToken).as("Токен не был создан. Админ не аутентифицирован").isNotNull();
+                    assertThat(jwtToken.get()).as("Токен не был создан. Админ не аутентифицирован").isNotNull();
                     assertThat(newAdminId).as("Id не существует. Новый админ не был создан").isNotNull();
 
 

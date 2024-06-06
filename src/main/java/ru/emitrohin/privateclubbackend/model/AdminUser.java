@@ -26,7 +26,7 @@ public class AdminUser extends BaseEntity {
 
     @Column(name = "last_visit", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private LocalDateTime lastVisit;
+    private LocalDateTime lastVisit = LocalDateTime.now();
 
     @Override
     public boolean equals(Object o) {

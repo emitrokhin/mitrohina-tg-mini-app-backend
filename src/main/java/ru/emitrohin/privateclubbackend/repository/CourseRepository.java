@@ -17,10 +17,10 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
     @EntityGraph(attributePaths = {"topics"})
     Optional<Course> findById(UUID id);
 
-    @EntityGraph(attributePaths = {"topics"})
+    @Query("SELECT c FROM Course c LEFT JOIN FETCH c.topics t WHERE c.id = :id AND c.published = true AND t.published = true")
     Optional<Course> findByIdAndPublishedTrue(UUID id);
 
-    Optional<Course> findByPublishedTrue();
+    List<Course> findByPublishedTrue();
 
     // Метод для поиска всех курсов пользователя со статусом EnrollmentStatus.ACTIVE
     @Query("SELECT c FROM Course c " +

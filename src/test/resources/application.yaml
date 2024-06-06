@@ -1,6 +1,4 @@
 spring:
-  main:
-    allow-bean-definition-overriding: true
   application:
     name: privateclubbackend-test
 
@@ -14,18 +12,8 @@ spring:
       ddl-auto: validate
 
   flyway:
-    enabled: true
     clean-disabled: false
-    baselineOnMigrate: true
-    validateOnMigrate: true
     locations: classpath:db/migration,classpath:db/testdata/
-
-# Есть проблемы на локалке
-server:
-  servlet:
-    encoding:
-      charset: UTF-8
-      force-response: true
 
 jwt:
   key: 1DA6EE2E51A27C7D8740FA9AC2F1E808DBA4EFFA7E6C134FE6AB667528CC87AD
@@ -35,9 +23,8 @@ telegram:
   authExpirationTime: 3600000
 
 s3:
-  url: http://localhost:4566
-  bucketName: e9cf083c-f58e-4387-80ed-0b438e8432f7
-  accessKey: noop
-  secretKey: noop
-  region: us-east-1
-
+  endpoint: https://endpoint.ru
+  bucket-name: bucket-name
+  access-key: access-key
+  secret-key: secret-key
+  region: region

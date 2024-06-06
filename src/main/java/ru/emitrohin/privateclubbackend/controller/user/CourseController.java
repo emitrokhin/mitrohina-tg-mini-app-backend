@@ -34,7 +34,7 @@ public class CourseController {
         return ResponseEntity.ok(courses);
     }
 
-   @GetMapping("/enrolled")
+    @GetMapping("/enrolled")
     public ResponseEntity<List<CourseSummaryResponse>> getMyEnrolledCourses() {
         var courses = courseService.getMyEnrolledCourses();
         return ResponseEntity.ok(courses);

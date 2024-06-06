@@ -74,6 +74,7 @@ public class CourseService {
     }
 
     @Transactional
+    //TODO нельзя зачислиться на неопубликованный курс
     public EnrollmentResponse setCourseEnrollmentStatus(UUID courseId, EnrollmentStatus status) {
         var course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId)); //TODO свой тип исключения?

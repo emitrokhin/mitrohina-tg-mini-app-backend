@@ -8,7 +8,6 @@ import ru.emitrohin.privateclubbackend.model.User;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     UserResponse toResponse(User user);
 

@@ -10,6 +10,7 @@ import ru.emitrohin.privateclubbackend.dto.response.course.AdminCourseSummaryRes
 import ru.emitrohin.privateclubbackend.dto.response.course.CourseDetailsResponse;
 import ru.emitrohin.privateclubbackend.dto.response.course.CourseSummaryResponse;
 import ru.emitrohin.privateclubbackend.model.Course;
+import ru.emitrohin.privateclubbackend.model.Topic;
 import ru.emitrohin.privateclubbackend.util.S3Utils;
 
 import java.util.UUID;
@@ -19,6 +20,9 @@ public interface CourseMapper {
 
     @Mapping(target = "coverUrl", source = "coverObjectKey", qualifiedByName = "generatePermanentUrl")
     CourseDetailsResponse toCourseDetailsResponse(Course course);
+
+    @Mapping(target = "coverUrl", source = "coverObjectKey", qualifiedByName = "generatePermanentUrl")
+    CourseDetailsResponse.TopicSummary toTopicSummary(Topic topic);
 
     @Mapping(target = "coverUrl", source = "coverObjectKey", qualifiedByName = "generatePermanentUrl")
     CourseSummaryResponse toCourseSummaryResponse(Course course);

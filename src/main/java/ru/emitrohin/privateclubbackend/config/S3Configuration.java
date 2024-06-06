@@ -17,19 +17,19 @@ import java.net.URISyntaxException;
 @Configuration
 public class S3Configuration {
 
-    @Value("${s3.url}")
-    private String s3url;
+    @Value("${s3.endpoint}")
+    private String s3endpoint;
 
-    @Value("${s3.accessKey}")
+    @Value("${s3.access-key}")
     private String accessKey;
 
-    @Value("${s3.secretKey}")
+    @Value("${s3.secret-key}")
     private String secretKey;
 
     @Value("${s3.region}")
     private String region;
 
-    @Value("${s3.bucketName}")
+    @Value("${s3.bucket-name}")
     private String bucketName;
 
     private AwsBasicCredentials credentials;
@@ -40,20 +40,18 @@ public class S3Configuration {
     }
 
     @Bean
-    @Primary
     public S3Presigner s3Presigner() throws URISyntaxException {
         return S3Presigner.builder()
-                .endpointOverride(new URI(s3url))
+                .endpointOverride(new URI(s3endpoint))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .region(Region.of(region))
                 .build();
     }
 
     @Bean
-    @Primary
     public S3Client s3Client() throws URISyntaxException {
         return S3Client.builder()
-                .endpointOverride(new URI(s3url))
+                .endpointOverride(new URI(s3endpoint))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
                 .region(Region.of(region))
                 .build();
@@ -61,7 +59,7 @@ public class S3Configuration {
 
     @Bean
     public String s3url() {
-        return s3url;
+        return s3endpoint;
     }
 
     @Bean

@@ -30,9 +30,13 @@ public class UserService {
     private final UserRepository repository;
 
     private final AdminUserRepository adminRepository;
+    
+    private final UserMapper userMapper;
+
+    private final AdminUserMapper adminUserMapper;
 
     public Optional<UserResponse> findById(UUID id) {
-        return repository.findById(id).map(UserMapper.INSTANCE::toResponse);
+        return repository.findById(id).map(userMapper::toResponse);
     }
 
     //TODO разобраться. по умолчанию сервис сразу мапит в dto. это правильно? в текущем случае мне нужен четко пользователь
@@ -43,45 +47,45 @@ public class UserService {
     public List<UserResponse> findByFirstName(String firstName) {
         return repository.findByFirstNameContaining(firstName)
                 .stream()
-                .map(UserMapper.INSTANCE::toResponse)
+                .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     public List<UserResponse> findByLastName(String firstName) {
         return repository.findByLastNameContaining(firstName)
                 .stream()
-                .map(UserMapper.INSTANCE::toResponse)
+                .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     public List<UserResponse> findByUsername(String userName) {
         return repository.findByUsernameContaining(userName)
                 .stream()
-                .map(UserMapper.INSTANCE::toResponse)
+                .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     public List<UserResponse> findAll() {
         return repository.findAll()
                 .stream()
-                .map(UserMapper.INSTANCE::toResponse)
+                .map(userMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     public UserResponse save(TelegramUserRequest telegramUserRequest) {
-        User newUser = UserMapper.INSTANCE.fromUserRequest(telegramUserRequest);
+        User newUser = userMapper.fromUserRequest(telegramUserRequest);
         //TODO это должен установить либо гибернейт либо бд
         newUser.setRole(Role.USER);
         newUser.setLastVisit(LocalDateTime.now());
         User savedUser = repository.save(newUser);
-        return UserMapper.INSTANCE.toResponse(savedUser);
+        return userMapper.toResponse(savedUser);
     }
 
     @Transactional
     public Optional<UserResponse> updateUser(UUID id, TelegramUserRequest telegramUserRequest) {
         return repository.findById(id)
-                .map(user -> repository.save(UserMapper.INSTANCE.fromUserRequest(telegramUserRequest)))
-                .map(UserMapper.INSTANCE::toResponse);
+                .map(user -> repository.save(userMapper.fromUserRequest(telegramUserRequest)))
+                .map(userMapper::toResponse);
     }
 
     public void deleteById(UUID id) {
@@ -98,7 +102,7 @@ public class UserService {
     }
 
     public Optional<AdminUserResponse> findAdminById(UUID adminUserId) {
-        return adminRepository.findById(adminUserId).map(AdminUserMapper.INSTANCE::toResponse);
+        return adminRepository.findById(adminUserId).map(adminUserMapper::toResponse);
     }
 
     //TODO разобраться с названиями и действиями, потому как в норме тут все мапится
@@ -109,7 +113,7 @@ public class UserService {
     public List<AdminUserResponse> findAllAdminUsers() {
         return adminRepository.findAll()
                 .stream()
-                .map(AdminUserMapper.INSTANCE::toResponse)
+                .map(adminUserMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -121,15 +125,15 @@ public class UserService {
         if (adminRepository.findByUsername(request.username()).isPresent()) {
             throw new IllegalArgumentException("Username is already taken");
         }
-        var adminUser = AdminUserMapper.INSTANCE.fromPasswordLoginRequest(request);
+        var adminUser = adminUserMapper.fromPasswordLoginRequest(request);
         var savedUser = adminRepository.save(adminUser);
-        return AdminUserMapper.INSTANCE.toResponse(savedUser);
+        return adminUserMapper.toResponse(savedUser);
     }
 
     public AdminUserResponse updateAdminUser(UUID id, PasswordUpdateRequest request) {
         var adminUser = adminRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));//TODO свой тип исключения
-        AdminUserMapper.INSTANCE.update(adminUser, request);
+        adminUserMapper.update(adminUser, request);
         var updatedUser =  adminRepository.save(adminUser);
-        return AdminUserMapper.INSTANCE.toResponse(updatedUser);
+        return adminUserMapper.toResponse(updatedUser);
     }
 }

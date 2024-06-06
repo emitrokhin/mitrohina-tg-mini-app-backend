@@ -21,7 +21,6 @@ import ru.emitrohin.privateclubbackend.model.Role;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@Profile("!test") //TODO должно быть как то подругому
 //TODO обобщить фильтры adminJwtAuthenticationFilter и jwtAuthenticationFilter
 //TODO CSRF, CORS
 //TODO Обобщить конфигурацию http
@@ -79,10 +78,5 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(request -> request.requestMatchers("/my/**").authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }
