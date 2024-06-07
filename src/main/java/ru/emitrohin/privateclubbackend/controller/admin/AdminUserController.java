@@ -18,8 +18,8 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/users")
-//TODO update admin user (password), delete
 //TODO разделить на два контроллера для админов и простых
+//TODO переименовать пакет и api c admin на private
 public class AdminUserController {
 
     private final UserService userService;

@@ -24,7 +24,7 @@ telegram:
 
 s3:
   endpoint: https://endpoint.ru
-  bucket-name: bucket-name
-  access-key: access-key
-  secret-key: secret-key
+  bucketName: bucket-name
+  accessKey: access-key
+  secretKey: secret-key
   region: region

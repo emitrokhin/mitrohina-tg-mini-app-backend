@@ -6,9 +6,9 @@ import ru.emitrohin.privateclubbackend.dto.response.EnrollmentResponse;
 import ru.emitrohin.privateclubbackend.model.CourseEnrollment;
 import ru.emitrohin.privateclubbackend.model.MaterialEnrollment;
 import ru.emitrohin.privateclubbackend.model.TopicEnrollment;
-import ru.emitrohin.privateclubbackend.util.S3Utils;
+import ru.emitrohin.privateclubbackend.service.S3Service;
 
-@Mapper(componentModel = "spring", uses= S3Utils.class)
+@Mapper(componentModel = "spring", uses= S3Service.class)
 public interface EnrollmentMapper {
 
     @Mapping(source = "id", target = "enrollmentId")

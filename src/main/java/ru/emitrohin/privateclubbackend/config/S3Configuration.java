@@ -1,10 +1,11 @@
 package ru.emitrohin.privateclubbackend.config;
 
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import ru.emitrohin.privateclubbackend.config.properties.S3Properties;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -15,55 +16,44 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 @Configuration
+@EnableConfigurationProperties(S3Properties.class)
+@RequiredArgsConstructor
 public class S3Configuration {
 
-    @Value("${s3.endpoint}")
-    private String s3endpoint;
-
-    @Value("${s3.access-key}")
-    private String accessKey;
-
-    @Value("${s3.secret-key}")
-    private String secretKey;
-
-    @Value("${s3.region}")
-    private String region;
-
-    @Value("${s3.bucket-name}")
-    private String bucketName;
+    private final S3Properties properties;
 
     private AwsBasicCredentials credentials;
 
     @PostConstruct
     public void init() {
-        credentials = AwsBasicCredentials.create(accessKey, secretKey);
+        credentials = AwsBasicCredentials.create(properties.accessKey(), properties.accessKey() );
     }
 
     @Bean
     public S3Presigner s3Presigner() throws URISyntaxException {
         return S3Presigner.builder()
-                .endpointOverride(new URI(s3endpoint))
+                .endpointOverride(new URI(properties.endpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                .region(Region.of(region))
+                .region(Region.of(properties.region()))
                 .build();
     }
 
     @Bean
     public S3Client s3Client() throws URISyntaxException {
         return S3Client.builder()
-                .endpointOverride(new URI(s3endpoint))
+                .endpointOverride(new URI(properties.endpoint()))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                .region(Region.of(region))
+                .region(Region.of(properties.region()))
                 .build();
     }
 
     @Bean
-    public String s3url() {
-        return s3endpoint;
+    public String endpoint() {
+        return properties.endpoint();
     }
 
     @Bean
     public String bucketName() {
-        return bucketName;
+        return properties.bucketName();
     }
 }

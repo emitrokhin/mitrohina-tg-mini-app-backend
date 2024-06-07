@@ -3,7 +3,6 @@ package ru.emitrohin.privateclubbackend.dto.mapper;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 import ru.emitrohin.privateclubbackend.dto.request.topic.TopicCreateRequest;
 import ru.emitrohin.privateclubbackend.dto.request.topic.TopicUpdateRequest;
 import ru.emitrohin.privateclubbackend.dto.response.topic.AdminTopicDetailsResponse;
@@ -11,9 +10,9 @@ import ru.emitrohin.privateclubbackend.dto.response.topic.AdminTopicSummaryRespo
 import ru.emitrohin.privateclubbackend.dto.response.topic.TopicDetailsResponse;
 import ru.emitrohin.privateclubbackend.model.Course;
 import ru.emitrohin.privateclubbackend.model.Topic;
-import ru.emitrohin.privateclubbackend.util.S3Utils;
+import ru.emitrohin.privateclubbackend.service.S3Service;
 
-@Mapper(componentModel = "spring", uses = S3Utils.class)
+@Mapper(componentModel = "spring", uses = S3Service.class)
 public interface TopicMapper {
 
     Topic fromTopicCreateRequest(TopicCreateRequest topicCreateRequest, @Context Course course, @Context String objectKey);

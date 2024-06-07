@@ -1,8 +1,8 @@
-package ru.emitrohin.privateclubbackend.util;
+package ru.emitrohin.privateclubbackend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.Named;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -15,15 +15,15 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.UUID;
 
-@Component
+@Service
 @RequiredArgsConstructor
-public class S3Utils {
+public class S3Service {
 
     private final S3Presigner s3Presigner;
 
     private final S3Client s3Client;
 
-    private final String s3url;
+    private final String endpoint;
 
     private final String bucketName;
 
@@ -50,7 +50,7 @@ public class S3Utils {
 
     @Named("generatePermanentUrl")
     public String generatePermanentUrl(String objectKey) {
-        return String.format("%s/%s", s3url, objectKey);
+        return String.format("%s/%s", endpoint, objectKey);
     }
 
     public String uploadPrivateFile(MultipartFile file) {

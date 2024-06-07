@@ -8,9 +8,7 @@ import ru.emitrohin.privateclubbackend.dto.response.material.MaterialResponse;
 import ru.emitrohin.privateclubbackend.dto.mapper.MaterialMapper;
 import ru.emitrohin.privateclubbackend.model.EnrollmentStatus;
 import ru.emitrohin.privateclubbackend.service.MaterialService;
-import ru.emitrohin.privateclubbackend.util.S3Utils;
 
-import java.net.URL;
 import java.util.UUID;
 
 @RequestMapping("/my/materials")

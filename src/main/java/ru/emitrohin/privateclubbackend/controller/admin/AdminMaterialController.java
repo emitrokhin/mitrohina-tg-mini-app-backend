@@ -11,7 +11,7 @@ import ru.emitrohin.privateclubbackend.dto.request.material.MaterialCreateReques
 import ru.emitrohin.privateclubbackend.dto.request.material.MaterialUpdateRequest;
 import ru.emitrohin.privateclubbackend.dto.response.material.AdminMaterialResponse;
 import ru.emitrohin.privateclubbackend.service.MaterialService;
-import ru.emitrohin.privateclubbackend.util.S3Utils;
+import ru.emitrohin.privateclubbackend.service.S3Service;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -26,7 +26,7 @@ public class AdminMaterialController {
 
     private final MaterialService materialService;
 
-    private final S3Utils s3Utils;
+    private final S3Service s3Service;
 
     @GetMapping("/{id}")
     public ResponseEntity<AdminMaterialResponse> getMaterial(@PathVariable("id") UUID id) {
@@ -41,8 +41,8 @@ public class AdminMaterialController {
         String coverObjectKey = null;
         String mediaObjectKey = null;
         try {
-            coverObjectKey = s3Utils.uploadPublicFile(createRequest.coverImage());
-            mediaObjectKey = s3Utils.uploadPrivateFile(createRequest.mediaFile());
+            coverObjectKey = s3Service.uploadPublicFile(createRequest.coverImage());
+            mediaObjectKey = s3Service.uploadPrivateFile(createRequest.mediaFile());
             var newMaterial = materialService.createMaterial(createRequest, coverObjectKey, mediaObjectKey);
             return ResponseEntity.status(HttpStatus.CREATED).body(newMaterial);
         } catch (Exception e) {
@@ -60,8 +60,8 @@ public class AdminMaterialController {
         String coverObjectKey = null;
         String mediaObjectKey = null;
         try {
-            coverObjectKey = s3Utils.uploadPublicFile(updateRequest.coverImage());
-            mediaObjectKey = s3Utils.uploadPrivateFile(updateRequest.mediaFile());
+            coverObjectKey = s3Service.uploadPublicFile(updateRequest.coverImage());
+            mediaObjectKey = s3Service.uploadPrivateFile(updateRequest.mediaFile());
             return materialService.updateMaterial(materialId, updateRequest, coverObjectKey, mediaObjectKey)
                     .map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.notFound().build());
@@ -93,7 +93,7 @@ public class AdminMaterialController {
     private void deleteFile(String objectKey) {
         if (objectKey != null) {
             try {
-                s3Utils.deleteFile(objectKey);
+                s3Service.deleteFile(objectKey);
             } catch (Exception ex) {
                 logger.warn("Can't delete file with objectKey {}. Reason: {}", objectKey, ex.getMessage());
             }
@@ -102,7 +102,7 @@ public class AdminMaterialController {
 
     private void findMaterialObjectKeyAndDelete(UUID materialId) {
         materialService.getMaterialObjectKey(materialId).ifPresentOrElse(
-                s3Utils::deleteFile,
+                s3Service::deleteFile,
                 () -> logger.warn("Can't delete objectKey file for material {}", materialId));
     }
 }

@@ -3,12 +3,13 @@ package ru.emitrohin.privateclubbackend.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
+import ru.emitrohin.privateclubbackend.config.properties.TelegramProperties;
 import ru.emitrohin.privateclubbackend.dto.request.telegram.TelegramInitDataRequest;
 import ru.emitrohin.privateclubbackend.dto.request.telegram.TelegramUserRequest;
 import ru.emitrohin.privateclubbackend.dto.response.JwtAuthenticationResponse;
-import ru.emitrohin.privateclubbackend.model.User;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -16,9 +17,10 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  Данные, полученные через мини-приложение, представляют собой URL-кодированную строку следующего формата:
@@ -40,68 +42,70 @@ import java.util.Optional;
  превышает expirationTime, то данные не валидны. Эта проверка необходима для предотвращения replay атак.
  */
 @Service
+@EnableConfigurationProperties(TelegramProperties.class)
 @RequiredArgsConstructor
 public class TelegramAuthenticationService {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
-    @Value("${telegram.botToken}")
-    private String botToken;
-
-    @Value("${telegram.authExpirationTime}")
-    private long expirationTime;
+    private final TelegramProperties telegramProperties;
 
     private final UserService userService;
+
     private final JwtService jwtService;
+
+    private final Clock clock;
 
     // telegram id is used as unique name
     public JwtAuthenticationResponse authenticateTelegram(TelegramInitDataRequest request) throws NoSuchAlgorithmException, InvalidKeyException, JsonProcessingException {
 
-        Map<String, String> parsedData = parseData(request.initData());
-        boolean initDataIsValid = isInitDataValid(parsedData);
+        var queryParams = parseInitData(request.initData());
 
-        //TODO правильно ли так делать?
-        if (!initDataIsValid) { throw new RuntimeException("Invalid telegram request"); }
+        if (!isInitDataValid(queryParams)) {
+            throw new RuntimeException("Telegram initData is not valid");
+        }
 
-        //извлечь данные из parsedData и смапить на TelegramUserRequest
-        String userJson = URLDecoder.decode(parsedData.get("user"), StandardCharsets.UTF_8);
-        TelegramUserRequest telegramUserRequest = objectMapper.readValue(userJson, TelegramUserRequest.class);
-        long telegramId = telegramUserRequest.telegramId();
+        if (isInitDataExpired(queryParams.get("auth_date"))) {
+            throw new RuntimeException("Telegram initData is expired");
+        }
+
+        //извлечь данные из queryParams и смапить на TelegramUserRequest
+        var telegramUserRequest = objectMapper.readValue(queryParams.get("user"), TelegramUserRequest.class);
+        var telegramId = telegramUserRequest.telegramId();
 
         // сохранить в БД, если нет
-        Optional<User> user = userService.findByTelegramId(telegramId);
+        var user = userService.findByTelegramId(telegramId);
         if (user.isEmpty()) {
             userService.save(telegramUserRequest);
         }
 
-        String jwt = jwtService.generateTokenForTelegramId(telegramId);
+        var jwt = jwtService.generateTokenForTelegramUserId(telegramId);
         return new JwtAuthenticationResponse(jwt);
     }
 
     /*
         Парсим пары, и раскладываем в хэш таблицу
-        query_id=<query_id>auth_date=<unix_time>&user={“id":123456789,“first_name":“John",“last_name":""}&hash=123abc
+        query_id=<query_id>&auth_date=<unix_time>&user={“id":123456789,“first_name":“John",“last_name":""}&hash=123abc
     */
-    private Map<String, String> parseData(String data)  {
-        String[] pairs = URLDecoder.decode(data, StandardCharsets.UTF_8).split("&");
-        Map<String, String> parsedData = new HashMap<>();
-        for (String pair : pairs) {
-            int idx = pair.indexOf("=");
-            parsedData.put(pair.substring(0, idx), pair.substring(idx + 1));
-        }
-        return parsedData;
+    private Map<String, String> parseInitData(String queryString)  {
+        var queryParams = new HashMap<String, String>();
+        var decodedInitData = URLDecoder.decode(queryString, StandardCharsets.UTF_8);
+        UriComponentsBuilder.fromUriString("?" + decodedInitData).build()
+                .getQueryParams()
+                .forEach((k, v) -> queryParams.put(k, v.getFirst()));
+        return queryParams;
     }
 
-    public boolean isInitDataValid(Map<String, String> values) throws NoSuchAlgorithmException, InvalidKeyException {
-        String calculatedHash = validateIntegrity(new HashMap<>(values));
-        long currentTime = System.currentTimeMillis() / 1000;
-        long authTime = Long.parseLong(values.get("auth_date"));
-        long timeDifference = currentTime - authTime;
+    private boolean isInitDataValid(Map<String, String> values) throws NoSuchAlgorithmException, InvalidKeyException {
+        var calculatedHash = validateIntegrity(new HashMap<>(values));
+        var receivedHash = values.get("hash");
+        return calculatedHash.equalsIgnoreCase(receivedHash);
+    }
 
-        String receivedHash = values.get("hash");
+    private boolean isInitDataExpired(String authDate) {
+        var authTime = Instant.ofEpochSecond(Long.parseLong(authDate));
+        return clock.instant().compareTo(authTime) >= telegramProperties.authExpirationTime();
 
-        //сравниваем рассчитанный хэш и разницу между временем запроса и временем экспирации
-        return calculatedHash.equalsIgnoreCase(receivedHash) && (timeDifference <= expirationTime);
     }
 
     /*
@@ -112,26 +116,26 @@ public class TelegramAuthenticationService {
         data.remove("hash");
 
         //формируем строку из пар, сортируя ключи по алфавиту, соединяя "\n"
-        String[] keyPairs = data.entrySet().stream()
+        var keyPairs = data.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .toArray(String[]::new);
-        String dataCheckString = String.join("\n", keyPairs);
+        var dataCheckString = String.join("\n", keyPairs);
 
         // Initial HMAC with "WebAppData"
-        Mac initialMac = Mac.getInstance("HmacSHA256");
-        SecretKeySpec initialKey = new SecretKeySpec("WebAppData".getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        var initialMac = Mac.getInstance("HmacSHA256");
+        var initialKey = new SecretKeySpec("WebAppData".getBytes(StandardCharsets.UTF_8), "HmacSHA256");
         initialMac.init(initialKey);
-        byte[] initialHash = initialMac.doFinal(botToken.getBytes(StandardCharsets.UTF_8));
+        byte[] initialHash = initialMac.doFinal(telegramProperties.botToken().getBytes(StandardCharsets.UTF_8));
 
         // HMAC using the initial hash as the key
-        Mac mac = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secretKey = new SecretKeySpec(initialHash, "HmacSHA256");
+        var mac = Mac.getInstance("HmacSHA256");
+        var secretKey = new SecretKeySpec(initialHash, "HmacSHA256");
         mac.init(secretKey);
         byte[] hashBytes = mac.doFinal(dataCheckString.getBytes(StandardCharsets.UTF_8));
 
         //делаем hex строку хэша
-        StringBuilder hexString = new StringBuilder();
+        var hexString = new StringBuilder();
         for (byte hashByte : hashBytes) {
             String hex = Integer.toHexString(0xff & hashByte);
             if (hex.length() == 1) {

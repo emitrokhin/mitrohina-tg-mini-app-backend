@@ -13,7 +13,7 @@ import ru.emitrohin.privateclubbackend.dto.request.course.UpdateCourseRequest;
 import ru.emitrohin.privateclubbackend.dto.response.course.AdminCourseDetailsResponse;
 import ru.emitrohin.privateclubbackend.dto.response.course.AdminCourseSummaryResponse;
 import ru.emitrohin.privateclubbackend.service.CourseService;
-import ru.emitrohin.privateclubbackend.util.S3Utils;
+import ru.emitrohin.privateclubbackend.service.S3Service;
 
 import java.util.*;
 
@@ -29,7 +29,7 @@ public class AdminCourseController {
 
     private final CourseService courseService;
 
-    private final S3Utils s3Utils;
+    private final S3Service s3Service;
 
     @GetMapping("/{id}")
     public ResponseEntity<AdminCourseDetailsResponse> getCourse(@PathVariable("id") UUID id) {
@@ -48,13 +48,13 @@ public class AdminCourseController {
     public ResponseEntity<AdminCourseSummaryResponse> createCourse(@Valid @RequestBody CreateCourseRequest request) {
         String objectKey = null;
         try {
-            objectKey = s3Utils.uploadPublicFile(request.coverImage());
+            objectKey = s3Service.uploadPublicFile(request.coverImage());
             var newCourse = courseService.createCourse(objectKey, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(newCourse);
         } catch (Exception e) {
             if (objectKey != null) {
                 try {
-                    s3Utils.deleteFile(objectKey);
+                    s3Service.deleteFile(objectKey);
                 } catch (Exception ex) {
                     logger.warn("Can't delete file with objectKey {}. Reason: {}", objectKey, ex.getMessage());
                 }
@@ -69,14 +69,14 @@ public class AdminCourseController {
                                                                           @Valid @RequestBody UpdateCourseRequest request) {
         String objectKey = null;
         try {
-            objectKey = s3Utils.uploadPublicFile(request.coverImage());
+            objectKey = s3Service.uploadPublicFile(request.coverImage());
             return courseService.updateCourse(id, objectKey, request)
                     .map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.notFound().build());
         } catch (Exception e) {
             if (objectKey != null) {
                 try {
-                    s3Utils.deleteFile(objectKey);
+                    s3Service.deleteFile(objectKey);
                 } catch (Exception ex) {
                     logger.warn("Can't delete file with objectKey {}. Reason: {}", objectKey, ex.getMessage());
                 }
@@ -103,7 +103,7 @@ public class AdminCourseController {
 
     private void findCourseObjectKeyAndDelete(UUID courseId) {
         courseService.getCourseObjectKey(courseId).ifPresentOrElse(
-                s3Utils::deleteFile,
+                s3Service::deleteFile,
                 () -> logger.warn("Can't delete objectKey file for course {}", courseId));
     }
 }

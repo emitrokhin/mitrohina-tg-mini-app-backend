@@ -7,9 +7,9 @@ import ru.emitrohin.privateclubbackend.dto.response.material.AdminMaterialRespon
 import ru.emitrohin.privateclubbackend.dto.response.material.MaterialResponse;
 import ru.emitrohin.privateclubbackend.model.Material;
 import ru.emitrohin.privateclubbackend.model.Topic;
-import ru.emitrohin.privateclubbackend.util.S3Utils;
+import ru.emitrohin.privateclubbackend.service.S3Service;
 
-@Mapper(componentModel = "spring", uses = S3Utils.class)
+@Mapper(componentModel = "spring", uses = S3Service.class)
 public interface MaterialMapper {
 
     Material fromMaterialCreateRequest(MaterialCreateRequest createRequest,

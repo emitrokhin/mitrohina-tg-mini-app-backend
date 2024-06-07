@@ -11,11 +11,11 @@ import ru.emitrohin.privateclubbackend.dto.response.course.CourseDetailsResponse
 import ru.emitrohin.privateclubbackend.dto.response.course.CourseSummaryResponse;
 import ru.emitrohin.privateclubbackend.model.Course;
 import ru.emitrohin.privateclubbackend.model.Topic;
-import ru.emitrohin.privateclubbackend.util.S3Utils;
+import ru.emitrohin.privateclubbackend.service.S3Service;
 
 import java.util.UUID;
 
-@Mapper(componentModel = "spring", uses = S3Utils.class)
+@Mapper(componentModel = "spring", uses = S3Service.class)
 public interface CourseMapper {
 
     @Mapping(target = "coverUrl", source = "coverObjectKey", qualifiedByName = "generatePermanentUrl")

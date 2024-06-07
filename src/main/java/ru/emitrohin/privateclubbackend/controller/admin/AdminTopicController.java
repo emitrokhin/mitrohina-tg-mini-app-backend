@@ -9,13 +9,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.emitrohin.privateclubbackend.dto.request.topic.TopicUpdateRequest;
-import ru.emitrohin.privateclubbackend.dto.response.course.AdminCourseSummaryResponse;
 import ru.emitrohin.privateclubbackend.dto.response.topic.AdminTopicDetailsResponse;
 import ru.emitrohin.privateclubbackend.dto.response.topic.AdminTopicSummaryResponse;
-import ru.emitrohin.privateclubbackend.dto.response.topic.TopicDetailsResponse;
 import ru.emitrohin.privateclubbackend.dto.request.topic.TopicCreateRequest;
 import ru.emitrohin.privateclubbackend.service.TopicService;
-import ru.emitrohin.privateclubbackend.util.S3Utils;
+import ru.emitrohin.privateclubbackend.service.S3Service;
 
 import java.util.*;
 
@@ -28,7 +26,7 @@ public class AdminTopicController {
 
     private final TopicService topicService;
 
-    private final S3Utils s3Utils;
+    private final S3Service s3Service;
 
     @GetMapping("/{id}")
     public ResponseEntity<AdminTopicDetailsResponse> getTopic(@PathVariable("id") UUID id) {
@@ -41,13 +39,13 @@ public class AdminTopicController {
     public ResponseEntity<AdminTopicSummaryResponse> createTopic(@RequestBody TopicCreateRequest request) {
         String objectKey = null;
         try {
-            objectKey = s3Utils.uploadPublicFile(request.coverImage());
+            objectKey = s3Service.uploadPublicFile(request.coverImage());
             var newTopic = topicService.createTopic(objectKey, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(newTopic);
         } catch (Exception e) {
             if (objectKey != null) {
                 try {
-                    s3Utils.deleteFile(objectKey);
+                    s3Service.deleteFile(objectKey);
                 } catch (Exception ex) {
                     logger.warn("Can't delete file with objectKey {}. Reason: {}", objectKey, ex.getMessage());
                 }
@@ -62,14 +60,14 @@ public class AdminTopicController {
                                                                         @Valid @RequestBody TopicUpdateRequest updateRequest) {
         String objectKey = null;
         try {
-            objectKey = s3Utils.uploadPublicFile(updateRequest.coverImage());
+            objectKey = s3Service.uploadPublicFile(updateRequest.coverImage());
             return topicService.updateTopic(topicId, objectKey, updateRequest)
                     .map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.notFound().build());
         } catch (Exception e) {
             if (objectKey != null) {
                 try {
-                    s3Utils.deleteFile(objectKey);
+                    s3Service.deleteFile(objectKey);
                 } catch (Exception ex) {
                     logger.warn("Can't delete file with objectKey {}. Reason: {}", objectKey, ex.getMessage());
                 }
@@ -94,7 +92,7 @@ public class AdminTopicController {
 
     private void findTopicObjectKeyAndDelete(UUID topicId) {
         topicService.getTopicObjectKey(topicId).ifPresentOrElse(
-                s3Utils::deleteFile,
+                s3Service::deleteFile,
                 () -> logger.warn("Can't delete objectKey file for topic {}", topicId));
     }
 }

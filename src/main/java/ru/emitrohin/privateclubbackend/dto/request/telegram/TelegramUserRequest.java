@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 
-
-//TODO есть сомнения в его нужности
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record TelegramUserRequest(
 

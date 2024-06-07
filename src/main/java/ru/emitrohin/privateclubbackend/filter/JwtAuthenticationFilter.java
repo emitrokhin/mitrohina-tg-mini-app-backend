@@ -52,10 +52,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = authHeader.substring(BEARER_PREFIX.length());
 
             //TODO тут выпадает .ExpiredJwtException как вообще заниматься обработкой таких исключений
-            long telegramId = jwtService.extractTelegramId(jwt);
+            long telegramId = jwtService.extractTelegramUserId(jwt);
 
             // Если токен валиден, то ищем в базе по telegramId и если есть создаем токен Spring по telegramId
-            if (jwtService.isTokenValid(jwt, telegramId)) {
+            if (jwtService.isTelegramUserTokenValid(jwt, telegramId)) {
                 Optional<User> authUser = userService.findByTelegramId(telegramId);
                 if (authUser.isPresent()) {
                     SecurityContext context = SecurityContextHolder.createEmptyContext();
