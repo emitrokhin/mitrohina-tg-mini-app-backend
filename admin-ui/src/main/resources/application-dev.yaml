@@ -28,6 +28,12 @@ spring:
       enabled: true
       path: /h2
 
+  mustache:
+    check-template-location: false
+
+vaadin:
+  allowed-packages: com.vaadin,org.vaadin,dev.hilla,com.example.application
+
 jwt:
   key: ${JWT_SECRET}
   expiration: 3600000
@@ -38,3 +44,6 @@ s3:
   accessKey: ${S3_ACCESS_KEY}
   secretKey: ${S3_SECRET_KEY}
   region: ${S3_REGION}
+
+logging.level:
+  org.atmosphere: warn
